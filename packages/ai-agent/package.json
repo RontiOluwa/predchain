@@ -1,5 +1,5 @@
 {
-    "name": "@predchain/shared",
+    "name": "@predchain/ai-agent",
     "version": "1.0.0",
     "private": true,
     "type": "module",
@@ -14,12 +14,16 @@
     "scripts": {
       "build": "tsc",
       "dev": "tsc --watch",
-      "clean": "rm -rf dist"
+      "clean": "rm -rf dist",
+      "test:parse": "node --loader ts-node/esm src/parsers/intent.parser.ts"
     },
     "dependencies": {
+      "@predchain/shared": "workspace:*",
+      "openai": "^4.47.0",
       "zod": "^3.23.0"
     },
     "devDependencies": {
-      "typescript": "^5.4.0"
+      "typescript": "^5.4.0",
+      "@types/node": "^20.0.0"
     }
   }
