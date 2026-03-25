@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Environment files (NEVER commit these)
+.env
+.env.local
+.env.production
+
+# TypeScript
+*.tsbuildinfo
+
+# Turbo
+.turbo/
+
+# Hardhat
+artifacts/
+cache/
+typechain-types/
+
+# Database
+*.db
+*.sqlite
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Prisma generated client (regenerate with db:generate)
+packages/*/src/generated/
