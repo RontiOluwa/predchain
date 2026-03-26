@@ -1,29 +1,30 @@
 {
-    "name": "@predchain/ai-agent",
-    "version": "1.0.0",
-    "private": true,
-    "type": "module",
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
-    "exports": {
-      ".": {
-        "import": "./dist/index.js",
-        "types": "./dist/index.d.ts"
-      }
-    },
-    "scripts": {
-      "build": "tsc",
-      "dev": "tsc --watch",
-      "clean": "rm -rf dist",
-      "test:parse": "node --loader ts-node/esm src/parsers/intent.parser.ts"
-    },
-    "dependencies": {
-      "@predchain/shared": "workspace:*",
-      "openai": "^4.47.0",
-      "zod": "^3.23.0"
-    },
-    "devDependencies": {
-      "typescript": "^5.4.0",
-      "@types/node": "^20.0.0"
+  "name": "@predchain/ai-agent",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "test:parse": "node --loader ts-node/esm src/parsers/intent.parser.ts"
+  },
+  "dependencies": {
+    "@predchain/shared": "workspace:*",
+    "openai": "^4.47.0",
+    "@anthropic-ai/sdk": "^0.39.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/node": "^20.0.0"
   }
+}
