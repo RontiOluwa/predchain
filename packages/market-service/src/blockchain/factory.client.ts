@@ -154,9 +154,10 @@ export class FactoryClient {
      */
     private uuidToBytes32(uuid: string): `0x${string}` {
         const stripped = uuid.replace(/-/g, "");
-        const bytes = Buffer.from(stripped, "utf8");
-        const padded = Buffer.alloc(32);
-        bytes.copy(padded, 32 - bytes.length);
+        // Encode to UTF-8, take at most 32 bytes, left-align in a 32-byte buffer
+        const bytes = Buffer.from(stripped, "utf8").subarray(0, 32);
+        const padded = Buffer.alloc(32); // zero-filled
+        bytes.copy(padded, 0);           // copy from start, right-pad with zeros
         return `0x${padded.toString("hex")}`;
     }
 }

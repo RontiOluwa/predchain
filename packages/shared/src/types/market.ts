@@ -76,7 +76,7 @@ export interface MarketSchema {
     confidence: number;
 
     /** Any edge case notes the AI flagged during parsing */
-    parserNotes?: string;
+    parserNotes?: string | undefined;
 }
 
 /**
@@ -86,10 +86,10 @@ export interface MarketSchema {
 export interface Market extends MarketSchema {
     id: string;
     status: MarketStatus;
-    outcome?: MarketOutcome;
+    outcome?: MarketOutcome | undefined;
 
     /** On-chain contract address, set after deployment */
-    contractAddress?: string;
+    contractAddress?: string | undefined;
 
     /** Total tokens staked YES */
     yesPool: string;
@@ -102,7 +102,7 @@ export interface Market extends MarketSchema {
 
     createdAt: Date;
     updatedAt: Date;
-    resolvedAt?: Date;
+    resolvedAt?: Date | undefined;
 }
 
 /**
@@ -133,5 +133,5 @@ export interface ResolutionEvidence {
     /** ISO timestamp of when oracle data was fetched */
     fetchedAt: string;
     /** On-chain tx hash of the resolve() call */
-    settlementTxHash?: string;
+    settlementTxHash?: string | undefined;
 }
