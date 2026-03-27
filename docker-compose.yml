@@ -1,0 +1,51 @@
+version: "3.9"
+
+# Local development services.
+# Start everything with: docker compose up -d
+# Stop everything with:  docker compose down
+# Wipe data with:        docker compose down -v
+
+services:
+
+  # ── PostgreSQL ───────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: predchain-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: predchain
+    ports:
+      # Host port 5432 → container port 5432
+      # Matches DATABASE_URL in .env
+      - "5432:5432"
+    volumes:
+      # Persist data between restarts
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── Redis ────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: predchain-redis
+    restart: unless-stopped
+    ports:
+      # Host port 6379 → container port 6379
+      # Matches REDIS_URL in .env
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:

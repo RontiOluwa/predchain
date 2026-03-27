@@ -1,0 +1,175 @@
+// Predchain Database Schema
+// Run: pnpm db:migrate to apply
+// Run: pnpm db:generate to regenerate the Prisma client
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────
+
+enum MarketStatus {
+  PENDING   // Parsed by AI, contract not yet deployed
+  OPEN      // Contract deployed, staking live
+  LOCKED    // Deadline passed, staking closed
+  RESOLVED  // AI + oracle determined outcome
+  SETTLED   // Payouts distributed
+  CANCELLED // Voided market
+}
+
+enum MarketOutcome {
+  YES
+  NO
+  VOID
+}
+
+enum ResolutionSource {
+  CHAINLINK_PRICE
+  CHAINLINK_EVENT
+  AI_WEB_SEARCH
+  MANUAL
+}
+
+enum StakeSide {
+  YES
+  NO
+}
+
+enum JobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+// ─── Models ──────────────────────────────────────────────────────
+
+model Market {
+  id               String           @id @default(uuid())
+
+  // ── AI-parsed fields (from MarketSchema) ─────────────────────
+  question         String
+  description      String
+  subject          String
+
+  // Condition stored as flat columns — maps to MarketSchema.condition
+  conditionOperator  String         // "gt" | "gte" | "lt" | "lte" | "eq" | "neq"
+  conditionThreshold String         // Numeric string e.g. "5000"
+  conditionUnit      String         // e.g. "USD"
+
+  deadline           DateTime
+  resolutionSource   ResolutionSource
+  resolutionKey      String         // Chainlink feed ID or search query
+  confidence         Float          // 0.0–1.0 from AI parser
+  parserNotes        String?
+
+  // ── Runtime fields ───────────────────────────────────────────
+  status             MarketStatus   @default(PENDING)
+  outcome            MarketOutcome?
+
+  // On-chain data (set after contract deployment)
+  contractAddress    String?        @unique
+  deploymentTxHash   String?
+
+  // Pool sizes (mirrors on-chain state, cached for fast reads)
+  yesPool            String         @default("0")
+  noPool             String         @default("0")
+
+  creatorAddress     String
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  resolvedAt         DateTime?
+
+  // ── Relations ────────────────────────────────────────────────
+  stakes             Stake[]
+  resolutionEvidence ResolutionEvidence?
+  jobs               MarketJob[]
+
+  @@index([status])
+  @@index([creatorAddress])
+  @@index([deadline])
+  @@index([resolutionSource])
+}
+
+model Stake {
+  id           String    @id @default(uuid())
+
+  marketId     String
+  market       Market    @relation(fields: [marketId], references: [id])
+
+  userAddress  String
+  side         StakeSide
+  amount       String    // Token amount in wei (string — no float precision issues)
+
+  txHash       String    @unique
+  blockNumber  Int?
+
+  createdAt    DateTime  @default(now())
+
+  @@index([marketId])
+  @@index([userAddress])
+  @@index([txHash])
+}
+
+model ResolutionEvidence {
+  id           String        @id @default(uuid())
+
+  marketId     String        @unique
+  market       Market        @relation(fields: [marketId], references: [id])
+
+  outcome      MarketOutcome
+  oracleValue  String
+  reasoning    String
+  fetchedAt    DateTime
+
+  settlementTxHash  String?
+  settlementBlock   Int?
+
+  createdAt    DateTime      @default(now())
+}
+
+model MarketJob {
+  id         String    @id @default(uuid())
+
+  marketId   String
+  market     Market    @relation(fields: [marketId], references: [id])
+
+  // Matches BullMQ queue job names
+  jobType    String    // "deploy-contract" | "lock-market" | "resolve-market"
+  bullJobId  String?
+
+  status     JobStatus @default(PENDING)
+  attempts   Int       @default(0)
+  error      String?
+
+  scheduledFor DateTime?
+  completedAt  DateTime?
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([marketId])
+  @@index([status])
+  @@index([jobType])
+}
+
+// Tracks processed on-chain events to prevent double-processing
+model OnChainEvent {
+  id          String   @id @default(uuid())
+
+  txHash      String   @unique
+  blockNumber Int
+  eventName   String
+  marketId    String?
+  rawData     Json
+
+  processedAt DateTime @default(now())
+
+  @@index([eventName])
+  @@index([marketId])
+}
