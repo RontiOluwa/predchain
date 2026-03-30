@@ -1,16 +1,9 @@
 {
-  "name": "@predchain/market-service",
+  "name": "@predchain/api-gateway",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "main": "./dist/exports.js",
-  "types": "./dist/exports.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/exports.js",
-      "types": "./dist/exports.d.ts"
-    }
-  },
+  "main": "./dist/index.js",
   "scripts": {
     "build": "tsc",
     "dev": "tsx watch src/index.ts",
@@ -20,15 +13,18 @@
   "dependencies": {
     "@predchain/shared": "workspace:*",
     "@predchain/ai-agent": "workspace:*",
+    "@predchain/market-service": "workspace:*",
     "@prisma/client": "^5.13.0",
-    "bullmq": "^5.7.0",
+    "fastify": "^4.27.0",
+    "@fastify/cors": "^9.0.0",
+    "@fastify/websocket": "^10.0.0",
+    "@fastify/jwt": "^8.0.0",
     "viem": "^2.13.0",
     "zod": "^3.23.0"
   },
   "devDependencies": {
     "typescript": "^5.4.0",
     "@types/node": "^20.0.0",
-    "tsx": "^4.11.0",
-    "prisma": "^5.13.0"
+    "tsx": "^4.11.0"
   }
 }

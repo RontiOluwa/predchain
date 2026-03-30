@@ -9,7 +9,6 @@ import {
 import type {
     DeployContractJobData,
     LockMarketJobData,
-    ResolveMarketJobData,
 } from "./market.jobs.js";
 
 const log = loggers.marketService;
@@ -64,7 +63,7 @@ export const deployContractWorker = new Worker<DeployContractJobData>(
             data: {
                 marketId,
                 jobType: "deploy-contract",
-                bullJobId: job.id,
+                bullJobId: job.id ?? null,
                 status: "PROCESSING",
             },
         });
@@ -195,53 +194,10 @@ export const lockMarketWorker = new Worker<LockMarketJobData>(
     { connection: redisConnection, concurrency: 5 }
 );
 
-// ─── Worker 3: Resolve Market ─────────────────────────────────────
-
-/**
- * Processes resolve-market jobs.
- * This is where the AI agent + oracle integration happens.
- *
- * For now this worker updates the DB to RESOLVED status.
- * Full oracle + AI integration is wired in Step 5
- * when we build the resolution-service package.
- */
-export const resolveMarketWorker = new Worker<ResolveMarketJobData>(
-    "resolve-market",
-    async (job) => {
-        const { marketId } = job.data;
-        log.info("Processing resolve-market job", { jobId: job.id, marketId });
-
-        const market = await prisma.market.findUnique({
-            where: { id: marketId },
-        });
-
-        if (!market || market.status !== "LOCKED") {
-            log.warn("Market not LOCKED, skipping resolution", {
-                marketId,
-                status: market?.status,
-            });
-            return;
-        }
-
-        /**
-         * Resolution logic lives in the resolution-service package (Step 5).
-         * For now we log and mark as pending resolution so the resolution
-         * service can pick it up when it starts.
-         *
-         * In Step 5 we'll import ResolutionAgent and ChainlinkAdapter here.
-         */
-        log.info("Market ready for resolution — resolution-service will handle", {
-            marketId,
-            resolutionSource: market.resolutionSource,
-            resolutionKey: market.resolutionKey,
-        });
-    },
-    { connection: redisConnection, concurrency: 5 }
-);
 
 // ─── Worker Error Handlers ────────────────────────────────────────
 
-[deployContractWorker, lockMarketWorker, resolveMarketWorker].forEach(
+[deployContractWorker, lockMarketWorker].forEach(
     (worker) => {
         worker.on("failed", async (job, err) => {
             log.error(`Worker job failed`, err, {
@@ -254,7 +210,7 @@ export const resolveMarketWorker = new Worker<ResolveMarketJobData>(
             if (job && job.attemptsMade >= (job.opts.attempts ?? 1)) {
                 await prisma.marketJob
                     .updateMany({
-                        where: { bullJobId: job.id },
+                        where: { bullJobId: job.id ?? null },
                         data: {
                             status: "FAILED",
                             error: err.message,

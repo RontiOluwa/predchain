@@ -42,7 +42,3 @@ const shutdown = async () => {
 
 process.on("SIGTERM", shutdown);
 process.on("SIGINT", shutdown);
-
-// Export for use by the API gateway
-export { MarketService } from "./services/market.service.js";
-export { enqueueDeployContract, enqueueLockMarket, enqueueResolveMarket } from "./jobs/market.jobs.js";
