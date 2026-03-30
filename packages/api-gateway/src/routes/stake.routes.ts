@@ -152,6 +152,7 @@ export async function stakeRoutes(fastify: FastifyInstance) {
                 const stakes = await marketService.getUserStakes(
                     request.params.address
                 );
+                log.info(`${request.params.address}: user stakes`, { stakes },);
                 return reply.send({ stakes });
             } catch (err) {
                 log.error("Failed to get user stakes", err);

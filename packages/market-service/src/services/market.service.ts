@@ -154,7 +154,7 @@ export class MarketService {
             prisma.stake.create({
                 data: {
                     marketId: request.marketId,
-                    userAddress: request.userAddress,
+                    userAddress: request.userAddress.toLowerCase(),
                     side: request.side,
                     amount: request.amount,
                     txHash: request.txHash,
@@ -220,7 +220,12 @@ export class MarketService {
 
     async getUserStakes(userAddress: string): Promise<PrismaStake[]> {
         return prisma.stake.findMany({
-            where: { userAddress: userAddress.toLowerCase() },
+            where: {
+                userAddress: {
+                    equals: userAddress.toLowerCase(),
+                    mode: "insensitive", // ← case-insensitive match
+                }
+            },
             include: { market: true },
             orderBy: { createdAt: "desc" },
         });
