@@ -25,9 +25,6 @@ export async function stakeRoutes(fastify: FastifyInstance) {
 
     const redis = createClient({
         url: process.env["REDIS_URL"] ?? "redis://localhost:6379",
-        socket: {
-            tls: (process.env["REDIS_URL"] ?? "").startsWith("rediss://"),
-        },
     });
     // createClient({ url: process.env["REDIS_URL"] ?? "redis://localhost:6379" });
 
