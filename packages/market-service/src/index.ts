@@ -2,8 +2,6 @@ import "dotenv/config";
 import { loggers } from "@predchain/shared";
 import { deployContractWorker, lockMarketWorker } from "./jobs/market.worker.js";
 
-// Start HTTP server
-import "./server.js";
 
 const log = loggers.marketService;
 
