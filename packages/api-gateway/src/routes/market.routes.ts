@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { MarketService } from "@predchain/market-service";
+// import { MarketService } from "@predchain/market-service";
 import { CreateMarketRequestSchema } from "@predchain/shared";
 import { requireAuth } from "../middleware/auth.js";
 import { loggers } from "@predchain/shared";
@@ -15,7 +15,8 @@ const log = loggers.apiGateway;
  * GET  /markets/user/:address → all markets created by a wallet
  */
 export async function marketRoutes(fastify: FastifyInstance) {
-    const marketService = new MarketService();
+    // const marketService = new MarketService();
+    const MARKET_SERVICE_URL = process.env["MARKET_SERVICE_URL"] ?? "http://localhost:3002";
 
     // ── GET /markets ──────────────────────────────────────────────
     fastify.get<{

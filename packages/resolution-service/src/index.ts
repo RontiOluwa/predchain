@@ -11,14 +11,25 @@ const prisma = new PrismaClient({
     log: process.env["NODE_ENV"] === "development" ? ["error", "warn"] : ["error"],
 });
 
+const redisUrl = process.env["REDIS_URL"] ?? "redis://localhost:6379";
+const parsedUrl = new URL(redisUrl);
+
 const redisConnection = {
-    host: process.env["REDIS_URL"]
-        ? new URL(process.env["REDIS_URL"]).hostname
-        : "localhost",
-    port: process.env["REDIS_URL"]
-        ? parseInt(new URL(process.env["REDIS_URL"]).port || "6379")
-        : 6379,
+    host: parsedUrl.hostname,
+    port: parseInt(parsedUrl.port || "6379"),
+    password: parsedUrl.password || undefined,
+    username: parsedUrl.username || undefined,
+    tls: parsedUrl.protocol === "rediss:" ? {} : undefined,
 };
+
+// const redisConnection = {
+//     host: process.env["REDIS_URL"]
+//         ? new URL(process.env["REDIS_URL"]).hostname
+//         : "localhost",
+//     port: process.env["REDIS_URL"]
+//         ? parseInt(new URL(process.env["REDIS_URL"]).port || "6379")
+//         : 6379,
+// };
 
 /**
  * Resolution Service Entry Point.

@@ -23,7 +23,14 @@ export async function stakeRoutes(fastify: FastifyInstance) {
     const marketService = new MarketService();
 
 
-    const redis = createClient({ url: process.env["REDIS_URL"] ?? "redis://localhost:6379" });
+    const redis = createClient({
+        url: process.env["REDIS_URL"] ?? "redis://localhost:6379",
+        socket: {
+            tls: (process.env["REDIS_URL"] ?? "").startsWith("rediss://"),
+        },
+    });
+    // createClient({ url: process.env["REDIS_URL"] ?? "redis://localhost:6379" });
+
     redis.connect().catch(console.error);
 
     const FAUCET_AMOUNT = 10_000n * 10n ** 18n; // 10,000 PRED
