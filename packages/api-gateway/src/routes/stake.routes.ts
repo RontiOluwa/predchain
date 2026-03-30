@@ -1,5 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { MarketService } from "@predchain/market-service";
+import { createClient } from "redis";
 import { StakeRequestSchema } from "@predchain/shared";
 import {
     requireAuth,
@@ -20,6 +21,15 @@ const log = loggers.apiGateway;
  */
 export async function stakeRoutes(fastify: FastifyInstance) {
     const marketService = new MarketService();
+
+
+    const redis = createClient({ url: process.env["REDIS_URL"] ?? "redis://localhost:6379" });
+    redis.connect().catch(console.error);
+
+    const FAUCET_AMOUNT = 10_000n * 10n ** 18n; // 10,000 PRED
+    const COOLDOWN_SECONDS = 24 * 60 * 60;       // 24 hours
+
+
 
     // ── POST /auth/nonce ──────────────────────────────────────────
     /**
@@ -146,6 +156,91 @@ export async function stakeRoutes(fastify: FastifyInstance) {
             } catch (err) {
                 log.error("Failed to get user stakes", err);
                 return reply.status(500).send({ error: "Failed to fetch stakes" });
+            }
+        }
+    );
+
+
+    // POST /faucet
+    fastify.post<{ Body: { address?: string } }>(
+        "/faucet",
+        async (request, reply) => {
+            const { address } = request.body ?? {};
+
+            if (!address || !/^0x[a-fA-F0-9]{40}$/.test(address)) {
+                return reply.status(400).send({ error: "Valid Ethereum address required" });
+            }
+
+            const normalizedAddress = address.toLowerCase();
+            const redisKey = `faucet:${normalizedAddress}`;
+
+            // ── Check cooldown ────────────────────────────────────────
+            const lastClaim = await redis.get(redisKey);
+
+            if (lastClaim) {
+                const claimedAt = parseInt(lastClaim);
+                const elapsedSeconds = Math.floor(Date.now() / 1000) - claimedAt;
+                const remainingSeconds = COOLDOWN_SECONDS - elapsedSeconds;
+                const remainingHours = Math.ceil(remainingSeconds / 3600);
+
+                return reply.status(429).send({
+                    error: `Cooldown active. Try again in ${remainingHours} hour${remainingHours !== 1 ? "s" : ""}.`,
+                    remainingSeconds,
+                });
+            }
+
+            // ── Mint tokens via deployer wallet ───────────────────────
+            try {
+                const { createWalletClient, createPublicClient, http, parseAbi } =
+                    await import("viem");
+                const { privateKeyToAccount } = await import("viem/accounts");
+                const { baseSepolia } = await import("viem/chains");
+
+                const account = privateKeyToAccount(
+                    process.env["DEPLOYER_PRIVATE_KEY"] as `0x${string}`
+                );
+
+                const walletClient = createWalletClient({
+                    chain: baseSepolia,
+                    transport: http(process.env["RPC_URL"]),
+                    account,
+                });
+
+                const publicClient = createPublicClient({
+                    chain: baseSepolia,
+                    transport: http(process.env["RPC_URL"]),
+                });
+
+                const txHash = await walletClient.writeContract({
+                    address: process.env["PRED_TOKEN_ADDRESS"] as `0x${string}`,
+                    abi: parseAbi(["function mint(address to, uint256 amount)"]),
+                    functionName: "mint",
+                    args: [address as `0x${string}`, FAUCET_AMOUNT],
+                    gas: 100_000n,
+                });
+
+                await publicClient.waitForTransactionReceipt({ hash: txHash });
+
+                // ── Store claim timestamp in Redis with 24hr TTL ──────────
+                await redis.setEx(
+                    redisKey,
+                    COOLDOWN_SECONDS,
+                    Math.floor(Date.now() / 1000).toString()
+                );
+
+                log.info("Faucet tokens minted", { address, txHash });
+
+                return reply.send({
+                    success: true,
+                    txHash,
+                    amount: "10000",
+                    address,
+                });
+            } catch (err) {
+                log.error("Faucet mint failed", err);
+                return reply.status(500).send({
+                    error: err instanceof Error ? err.message : "Faucet failed",
+                });
             }
         }
     );

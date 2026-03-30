@@ -1,8 +1,8 @@
+import "dotenv/config";
 import { loggers } from "@predchain/shared";
 import {
     deployContractWorker,
     lockMarketWorker,
-    resolveMarketWorker,
 } from "./jobs/market.worker.js";
 
 const log = loggers.marketService;
@@ -34,7 +34,7 @@ const shutdown = async () => {
     await Promise.all([
         deployContractWorker.close(),
         lockMarketWorker.close(),
-        resolveMarketWorker.close(),
+        // resolveMarketWorker.close(),
     ]);
     log.info("All workers stopped");
     process.exit(0);

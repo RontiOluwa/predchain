@@ -11,20 +11,21 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@predchain/shared": "workspace:*",
+    "@fastify/cors": "^9.0.0",
+    "@fastify/jwt": "^8.0.0",
+    "@fastify/websocket": "^10.0.0",
     "@predchain/ai-agent": "workspace:*",
     "@predchain/market-service": "workspace:*",
+    "@predchain/shared": "workspace:*",
     "@prisma/client": "^5.13.0",
     "fastify": "^4.27.0",
-    "@fastify/cors": "^9.0.0",
-    "@fastify/websocket": "^10.0.0",
-    "@fastify/jwt": "^8.0.0",
+    "redis": "^5.11.0",
     "viem": "^2.13.0",
     "zod": "^3.23.0"
   },
   "devDependencies": {
-    "typescript": "^5.4.0",
     "@types/node": "^20.0.0",
-    "tsx": "^4.11.0"
+    "tsx": "^4.11.0",
+    "typescript": "^5.4.0"
   }
 }
