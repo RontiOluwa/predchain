@@ -1,13 +1,3 @@
-/**
- * Structured logger for all predchain services.
- *
- * Uses console under the hood for simplicity now.
- * In production, swap the underlying transport to Pino or Winston
- * and ship logs to a service like Datadog or Logtail.
- *
- * Every log line is JSON so it's machine-parseable in production.
- */
-
 type LogLevel = "debug" | "info" | "warn" | "error";
 
 interface LogEntry {
@@ -33,19 +23,31 @@ function formatEntry(
     };
 }
 
+function isDev(): boolean {
+    try {
+        // @ts-ignore — process may not exist in all environments
+        return (typeof process !== "undefined" && process.env?.["NODE_ENV"]) === "development";
+    } catch {
+        return false;
+    }
+}
+
 export function createLogger(service: string) {
     return {
         debug(message: string, meta?: Record<string, unknown>) {
-            if (process.env["NODE_ENV"] === "development") {
+            if (isDev()) {
+                // @ts-ignore
                 console.debug(JSON.stringify(formatEntry("debug", service, message, meta)));
             }
         },
 
         info(message: string, meta?: Record<string, unknown>) {
+            // @ts-ignore
             console.info(JSON.stringify(formatEntry("info", service, message, meta)));
         },
 
         warn(message: string, meta?: Record<string, unknown>) {
+            // @ts-ignore
             console.warn(JSON.stringify(formatEntry("warn", service, message, meta)));
         },
 
@@ -55,6 +57,7 @@ export function createLogger(service: string) {
                     ? { errorMessage: error.message, stack: error.stack }
                     : { error: String(error) };
 
+            // @ts-ignore
             console.error(
                 JSON.stringify(
                     formatEntry("error", service, message, { ...errorMeta, ...meta })
@@ -64,7 +67,6 @@ export function createLogger(service: string) {
     };
 }
 
-/** Pre-built logger instances for each service */
 export const loggers = {
     aiAgent: createLogger("ai-agent"),
     marketService: createLogger("market-service"),

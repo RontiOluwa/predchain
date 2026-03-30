@@ -16,6 +16,5 @@
     "sourceMap": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "types": ["node"]
   }
 }
