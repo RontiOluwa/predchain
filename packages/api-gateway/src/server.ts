@@ -29,7 +29,7 @@ export async function buildServer() {
     await server.register(cors, {
         origin:
             process.env["NODE_ENV"] === "production"
-                ? ["https://predchain-web.vercel.app/"]
+                ? ["https://predchain-web.vercel.app"]
                 : true, // Allow all origins in development
         credentials: true,
     });
