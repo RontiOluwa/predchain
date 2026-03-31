@@ -32,7 +32,7 @@ export function useMarketSocket({
     subscribeAll = false,
 }: UseMarketSocketOptions) {
     const wsRef = useRef<WebSocket | null>(null);
-    const reconnectTimer = useRef<NodeJS.Timeout>();
+    const reconnectTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);;
     const onMessageRef = useRef(onMessage);
     onMessageRef.current = onMessage; // Always use latest callback
 
