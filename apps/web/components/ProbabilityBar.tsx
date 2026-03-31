@@ -3,7 +3,7 @@ import { calcProbability, formatPred } from "@/hooks/useMarkets";
 interface ProbabilityBarProps {
     yesPool: string;
     noPool: string;
-    outcome?: "YES" | "NO" | "VOID";
+    outcome?: "YES" | "NO" | "VOID" | undefined;
 }
 
 export function ProbabilityBar({ yesPool, noPool, outcome }: ProbabilityBarProps) {
