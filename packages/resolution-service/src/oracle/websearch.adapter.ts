@@ -19,7 +19,7 @@ export interface WebSearchResult {
     /** The factual value discovered e.g. "Arsenal finished 2nd" */
     value: string;
     /** URL or source name if found */
-    source?: string;
+    source?: string | undefined;
     /** Human-readable summary for the resolution evidence */
     summary: string;
     fetchedAt: Date;
@@ -100,9 +100,9 @@ Deadline (only events on or before this date count): ${deadline.toISOString()}`;
                  */
                 tools: [
                     {
-                        type: "web_search_20250305" as const,
+                        type: "web_search_20250305",
                         name: "web_search",
-                    },
+                    } as any,
                 ],
                 messages: [{ role: "user", content: userPrompt }],
             });
