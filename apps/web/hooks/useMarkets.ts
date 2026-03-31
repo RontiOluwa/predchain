@@ -22,7 +22,10 @@ export const marketKeys = {
 export function useMarkets(status?: string) {
     return useQuery({
         queryKey: marketKeys.list(status),
-        queryFn: () => marketsApi.list({ status, limit: 50 }),
+        queryFn: () => marketsApi.list({
+            ...(status !== undefined && { status }), // ← only include if defined
+            limit: 50
+        }),
         refetchInterval: 30_000,
         staleTime: 10_000,
     });
