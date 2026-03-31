@@ -1,0 +1,5 @@
+[build]
+buildCommand = "pnpm install --no-frozen-lockfile && pnpm --filter @predchain/shared build && pnpm --filter @predchain/ai-agent build && pnpm --filter @predchain/market-service build && pnpm --filter @predchain/api-gateway build && pnpm db:generate && npx prisma migrate deploy --schema=./prisma/schema.prisma"
+
+[deploy]
+startCommand = "cd packages/api-gateway && node dist/index.js"
