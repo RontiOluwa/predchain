@@ -9,7 +9,7 @@
  * - Error handling is consistent
  */
 
-const BASE_URL = "/api"; // Proxied by Next.js rewrites to localhost:3001
+const BASE_URL = process.env["NEXT_PUBLIC_API_URL"]; // Proxied by Next.js rewrites to localhost:3001
 
 function getAuthHeader(): Record<string, string> {
     const token = localStorage.getItem("predchain_jwt");
