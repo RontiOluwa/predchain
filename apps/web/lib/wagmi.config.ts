@@ -1,5 +1,6 @@
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { baseSepolia } from "wagmi/chains";
+import type { Config } from "wagmi";
 
 /**
  * Wagmi config — wallet connections and chain setup.
@@ -9,12 +10,12 @@ import { baseSepolia } from "wagmi/chains";
  *
  * Get a WalletConnect project ID at: https://cloud.walletconnect.com
  */
-export const wagmiConfig = getDefaultConfig({
+export const wagmiConfig: Config = getDefaultConfig({
     appName: "Predchain",
     projectId: process.env["NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID"] ?? "predchain-dev",
     chains: [baseSepolia],
-    ssr: true, // Required for Next.js App Router
-});
+    ssr: true,
+}) as Config;
 
 /**
  * PredToken contract ABI — only functions the frontend calls.
