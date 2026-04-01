@@ -71,8 +71,8 @@ export default function MarketDetailPage() {
                     <span className="text-gray-900">{deadline.toLocaleDateString()}</span>
                     <span className="text-gray-500">Resolution</span>
                     <span className="text-gray-900">{market.resolutionSource}</span>
-                    <span className="text-gray-500">AI Confidence</span>
-                    <span className="text-gray-900">{(market.confidence * 100).toFixed(0)}%</span>
+                    {/* <span className="text-gray-500">AI Confidence</span>
+                    <span className="text-gray-900">{(market.confidence * 100).toFixed(0)}%</span> */}
                     {market.contractAddress && (
                         <>
                             <span className="text-gray-500">Contract</span>
