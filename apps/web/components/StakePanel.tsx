@@ -132,7 +132,7 @@ export function StakePanel({ market }: { market: ApiMarket }) {
             </button>
 
 
-            <FaucetButton />
+            {/* <FaucetButton /> */}
             <p className="text-xs text-gray-400 text-center">
                 Two MetaMask confirmations required: approve + stake
             </p>
